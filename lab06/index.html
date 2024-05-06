@@ -1,0 +1,166 @@
+<html>
+  <head>
+    <title>Nodejs</title>
+    <script>
+      function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return "";
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+      }
+      window.onload = function () {
+        let DETECT_DIV = document.getElementById("DETECT_DIV");
+        let NO_DETECT_DIV = document.getElementById("NO_DETECT_DIV");
+        let NO_DETECT = document.getElementById("NO_DETECT");
+
+        if(getParameterByName("DETECT")!=null){
+          if (getParameterByName("DETECT") === "NO_DETECT") {
+            DETECT_DIV.style.display = "none";
+            NO_DETECT_DIV.style.display = "";
+            NO_DETECT.checked = true;
+          }
+          if (getParameterByName("DETECT") === "DETECT") {
+            let DETECT = document.getElementById("DETECT");
+            let adc_value = document.getElementById("adc_value");
+            DETECT_DIV.style.display = "";
+            DETECT.checked = true;
+            NO_DETECT_DIV.style.display = "none";
+
+            var xhr = new XMLHttpRequest();
+            setInterval(UpdateAdcValue, 1000);
+            function UpdateAdcValue() {
+              xhr.open('get','/readadc',true);
+              xhr.send();
+            }
+            xhr.onload = function(){
+              console.log(xhr.responseText);
+              var str = JSON.parse(xhr.responseText);
+              adc_value.innerHTML = str;
+            }
+          }
+        } else{
+          DETECT_DIV.style.display = "none";
+          NO_DETECT_DIV.style.display = "";
+          NO_DETECT.checked = true;
+        }
+
+
+        let led1 = document.getElementById("led1");
+        let led2 = document.getElementById("led2");
+        let led3 = document.getElementById("led3");
+        let led4 = document.getElementById("led4");
+        let status = getParameterByName("status");
+        let led1On = document.getElementById("led1On");
+        let led2On = document.getElementById("led2On");
+        let led3On = document.getElementById("led3On");
+        let led4On = document.getElementById("led4On");
+        if (status === "on") {
+          document.getElementById("on").checked = true;
+        } else if (status === "off") {
+          document.getElementById("off").checked = true;
+        } else {
+          let modeshine = document.getElementById("frequency");
+          let modeshineTimes = document.getElementById("modeshineTimes");
+          if (getParameterByName("frequency")) {
+            modeshine.value = getParameterByName("frequency");
+            modeshineTimes.innerHTML = `Mode_Shine_Times: ${getParameterByName(
+              "frequency"
+            )}`;
+          }
+          return;
+        }
+        if (getParameterByName("led1") === "on") {
+          led1.checked = true;
+          led1On.innerHTML = "LED 1 " + status.toUpperCase();
+        }
+        if (getParameterByName("led2") === "on") {
+          led2.checked = true;
+          led2On.innerHTML = "LED 2 " + status.toUpperCase();
+        }
+        if (getParameterByName("led3") === "on") {
+          led3.checked = true;
+          led3On.innerHTML = "LED 3 " + status.toUpperCase();
+        }
+        if (getParameterByName("led4") === "on") {
+          led4.checked = true;
+          led4On.innerHTML = "LED 4 " + status.toUpperCase();
+        }
+      };
+    </script>
+  </head>
+
+  <body>
+    <h1>Nodejs</h1>
+    <hr />
+    <div style="display: none;" id="DETECT_DIV">
+      <h1>感測器偵測中</h1>
+      <h2>adc_value = <nobr id="adc_value">0</nobr></h2>
+    </div>
+    <div style="display: none;" id="NO_DETECT_DIV">
+      <h1>手動控制面板</h1>
+      <h2>LED Control Panel</h2>
+      <form>
+        <table>
+          <tr>
+            <td>
+              <input type="checkbox" id="led1" name="led1" />
+              <label for="led1">LED 1</label>
+            </td>
+            <td>
+              <input type="checkbox" id="led2" name="led2" />
+              <label for="led2">LED 2</label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="checkbox" id="led3" name="led3" />
+              <label for="led3">LED 3</label>
+            </td>
+            <td>
+              <input type="checkbox" id="led4" name="led4" />
+              <label for="led4">LED 4</label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="radio" id="on" name="status" value="on" />
+              <label for="on">ON</label>
+            </td>
+            <td>
+              <input type="radio" id="off" name="status" value="off" />
+              <label for="off">OFF</label>
+            </td>
+          </tr>
+        </table>
+        <!-- show LED on -->
+        <div>
+          <p id="led1On"></p>
+          <p id="led2On"></p>
+          <p id="led3On"></p>
+          <p id="led4On"></p>
+        </div>
+        <div>
+          <button id="submit" type="submit">Submit</button>
+        </div>
+      </form>
+      <hr />
+      <h2>LED Switch Frequency</h2>
+      <form>
+        <input type="text" id="frequency" name="frequency" />
+        <button id="submitFrequency" type="submit">Mode Shine</button>
+      </form>
+      <p id="modeshineTimes"></p>  
+    </div>
+    <div>
+      <form>
+        <button>Submit</button>
+        <input type="radio" id="DETECT" name="DETECT" value="DETECT" />
+        <label for="DETECT">DETECT</label>
+        <input type="radio" id="NO_DETECT" name="DETECT" value="NO_DETECT" />
+        <label for="NO_DETECT">NO_DETECT</label>
+      </form>
+    </div>
+  </body>
+</html>
